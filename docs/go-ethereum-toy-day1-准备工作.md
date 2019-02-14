@@ -92,4 +92,4 @@ killall -QUIT geth
 ### 编译运行ruby-ethereum
 一下午都没搞这个，看电影看视频，然后就发散出去了。
 git clone https://github.com/chaozding/ruby-ethereum
-
+->《用Go语言构建自己的区块链教程》
