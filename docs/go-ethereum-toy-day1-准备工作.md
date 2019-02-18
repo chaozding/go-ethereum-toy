@@ -62,11 +62,13 @@ vi .zshrc
 export GOPATH=$HOME/go
 suorce .zshrc
 echo $GOPATH
-mkdir -p $GOPATH/src/github.com/ethereum
-git clone git@github.com:chaozding/go-ethereum.git $GOPATH/src/github.com/ethereum/go-ethereum
+mkdir -p $GOPATH/src/github.com/chaozding
+rm -rf go-ethereum
+git clone git@github.com:chaozding/go-ethereum.git $GOPATH/src/github.com/chaozding/go-ethereum
 #### 构建可执行程序
-cd $GOPATH/src/github.com/ethereum/go-ethereum
+cd $GOPATH/src/github.com/chaozding/go-ethereum
 go install -v ./cmd/geth
+奇怪只能在$GOPATH/src/github.com/ethereum/go-ethereum目录下运行，晕
 geth会被安装到 $GOPATH/bin/geth
 #### Git flow
 #### 测试
