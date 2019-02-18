@@ -27,9 +27,9 @@ func GenerateNewBlock(preBlock Block, data string) Block {
 	newBlock.Index = preBlock.Index + 1
 	newBlock.PrevBlockHash = preBlock.Hash
 	newBlock.Timestamp = time.Now().Unix()
-	newBlock.Hash = calculateHash(newBlock)
-
 	newBlock.Data = data
+
+	newBlock.Hash = calculateHash(newBlock)
 	return newBlock
 }
 
