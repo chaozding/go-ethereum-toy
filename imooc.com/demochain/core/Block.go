@@ -1,4 +1,4 @@
-package demochain
+package core
 
 import (
 	"crypto/sha256"
