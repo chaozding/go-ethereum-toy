@@ -13,6 +13,7 @@ func (bc *Blockchain) AddBlock(data string) {
 	bc.Blocks = append(bc.Blocks, newBlock)
 }
 
-func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指针
-	return NewBlock("Genesis Block", []byte{}) //空数据
+//NewBlockchain create a new Blockchain with genesis Block
+func NewBlockchain() *Blockchain {
+	return &Blockchain{[]*Block{NewGenesisBlock()}}
 }

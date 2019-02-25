@@ -17,6 +17,10 @@ type Block struct {
 	Hash         []byte //区块自身的哈希值，用于校验区块的数据有效性
 }
 
+func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指针
+	return NewBlock("Genesis Block", []byte{}) //空数据
+}
+
 func NewBlock(data string, preBlockHash []byte) *Block {
 	block := &Block{time.Now().Unix(), []byte(data), preBlockHash, []byte{}}
 	block.SetHash()
