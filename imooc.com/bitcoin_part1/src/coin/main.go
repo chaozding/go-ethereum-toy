@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/chaozding/go-ethereum-toy/imooc.com/bitcoin_part1/src/core"
+	"core"
 )
 
 func main() {
