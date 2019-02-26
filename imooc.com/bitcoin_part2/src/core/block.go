@@ -25,13 +25,19 @@ func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指�
 
 func NewBlock(data string, preBlockHash []byte) *Block {
 	block := &Block{time.Now().Unix(), []byte(data), preBlockHash, []byte{}}
-	block.SetHash()
+	//block.SetHash()
+	pow := NewProofOfWork(block) //可以理解为类，然后就不用传递数据了
+	nonce, hash := pow.Run()     //为什么不用pow.Run(block)
+
+	block.Hash = hash[:] //满足系统规定工作量条件的哈希值
+	block.Nonce = nonce  //可以理解为工作量完成条件
+
 	return block
 }
 
-func (b *Block) SetHash() {
-	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
-	headers := bytes.Join([][]byte{timestamp, b.Data, b.PreBlockHash}, []byte{})
-	hash := sha256.Sum256(headers) //headers其实包含了数据部分，hash类型是字节数组[]byte
-	b.Hash = hash[:]               //转换为字节数组
-}
+//func (b *Block) SetHash() {
+//	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
+//	headers := bytes.Join([][]byte{timestamp, b.Data, b.PreBlockHash}, []byte{})
+//	hash := sha256.Sum256(headers) //headers其实包含了数据部分，hash类型是字节数组[]byte
+//	b.Hash = hash[:]               //转换为字节数组
+//}
