@@ -3,7 +3,6 @@ package main
 import (
 	"core"
 	"fmt"
-	"strconv"
 )
 
 func main() {
@@ -17,9 +16,8 @@ func main() {
 		fmt.Printf("Prev.hash: %x\n", block.PreBlockHash) //打印前一个区块的哈希值
 		fmt.Printf("Data: %s\n", block.Data)              //以字符串格式显示数据
 		fmt.Printf("Hash: %x\n", block.Hash)              //%x适合[]byte
-
-		pow := core.NewProofofWork(block)
-		fmt.Printf("Pow: %s\n", strconv.FormatBool(pow.Validate()))
+		//fmt.Printf("Hash: %s\n", block.Hash) //乱码
+		//fmt.Printf("Hash: %s\n", hex.EncodeToString(block.Hash[:]))
 		fmt.Println()
 	}
 }
