@@ -3,6 +3,7 @@ package main
 import (
 	"core"
 	"fmt"
+	"strconv"
 )
 
 func main() {
@@ -18,6 +19,9 @@ func main() {
 		fmt.Printf("Hash: %x\n", block.Hash)              //%x适合[]byte
 		//fmt.Printf("Hash: %s\n", block.Hash) //乱码
 		//fmt.Printf("Hash: %s\n", hex.EncodeToString(block.Hash[:]))
+
+		pow := core.NewProofOfWork(block)                           //直接把block输入证明函数，pow是什么类型
+		fmt.Printf("Pow: %s\n", strconv.FormatBool(pow.Validate())) //为什么不直接用pow判断有效性，还要再调用Validate()？
 		fmt.Println()
 	}
 }
