@@ -1,9 +1,6 @@
 package core
 
 import (
-	"bytes"
-	"crypto/sha256"
-	"strconv"
 	"time"
 )
 
@@ -24,10 +21,12 @@ func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指�
 }
 
 func NewBlock(data string, preBlockHash []byte) *Block {
-	block := &Block{time.Now().Unix(), []byte(data), preBlockHash, []byte{}}
+	block := &Block{time.Now().Unix(), []byte(data), preBlockHash, []byte{}, 0}
 	//block.SetHash()
 	pow := NewProofOfWork(block) //可以理解为类，然后就不用传递数据了
-	nonce, hash := pow.Run()     //为什么不用pow.Run(block)
+	//可以理解为类的构造函数
+	nonce, hash := pow.Run() //为什么不用pow.Run(block)
+	//就是挖矿了
 
 	block.Hash = hash[:] //满足系统规定工作量条件的哈希值
 	block.Nonce = nonce  //可以理解为工作量完成条件
