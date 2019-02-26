@@ -15,6 +15,8 @@ type Block struct {
 	Data         []byte //区块包含的数据，也可以是string，可以非常长
 	PreBlockHash []byte //前一个区块的哈希值，也可以是string，不过[]byte更简单
 	Hash         []byte //区块自身的哈希值，用于校验区块的数据有效性
+
+	Nonce int
 }
 
 func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指针
