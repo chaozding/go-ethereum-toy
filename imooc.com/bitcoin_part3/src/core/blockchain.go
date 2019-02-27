@@ -20,8 +20,36 @@ type Blockchain struct {
 
 //BlockchainIterator is used to iterate over blockchain blocks
 type BlockchainIterator struct {
-	currentHash []byte
+	currentHash []byte   //记录当前的索引/哈希值
 	Db          *bolt.DB //访问方法都要变了
+}
+
+//Iterator...
+func (bc *Blockchain) Iterator() *BlockchainIterator {
+	bci := &BlockchainIterator{bc.tip, bc.Db}
+
+	return bci //区块链迭代器
+}
+
+//Next returns next block starting from the tip
+func (i *BlockchainIterator) Next() *Block {
+	var block *Block
+
+	err := i.Db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blocksBucket))
+		encodedBlock := b.Get(i.currentHash)
+		block = DeserializeBlock(encodedBlock)
+
+		return nil
+	})
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	i.currentHash = block.PreBlockHash //
+
+	return block
 }
 
 //AddBlock saves provided data as a block in the blockchain
