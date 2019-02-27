@@ -22,3 +22,8 @@ func (cli *CLI) validateArgs() { //验证参数
 		os.Exit(1)
 	}
 }
+
+func (cli *CLI) addBlock(data string) {
+	cli.Bc.AddBlock(data)
+	fmt.Println("Success!")
+}
