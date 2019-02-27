@@ -12,7 +12,7 @@ func main() {
 	//bc.AddBlock("Send 1 BTC to Ivan")      //加入一个新区块，发送一个比特币给伊文
 	//bc.AddBlock("Send 2 more BTC to Ivan") //加入一个新区块，发送更多比特币给伊文
 
-	cli := core.CLI(bc) //把要操作的对象给命令行
+	cli := core.CLI{bc} //把要操作的对象给命令行
 	cli.Run()           //输入数据，运行
 
 	////校验区块链上的区块
