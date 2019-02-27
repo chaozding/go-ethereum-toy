@@ -1,6 +1,9 @@
 package core
 
 import (
+	"bytes"
+	"encoding/gob"
+	"log"
 	"time"
 )
 
@@ -16,10 +19,24 @@ type Block struct {
 	Nonce int
 }
 
+//Serialize serializes the block 强行编码，序列化区块
+func (b *Block) Serialize() []byte {
+	var result bytes.Buffer //临时缓存区域
+	encoder := gob.NewEncoder(&result)
+
+	err := encoder.Encode(b)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return result.Bytes() //通过自身类库转成了字节数组类型
+}
+
 func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指针
 	return NewBlock("Genesis Block", []byte{}) //空数据
 }
 
+//经过了工作证明的区块
 func NewBlock(data string, preBlockHash []byte) *Block {
 	block := &Block{time.Now().Unix(), []byte(data), preBlockHash, []byte{}, 0}
 	//block.SetHash()
@@ -40,3 +57,17 @@ func NewBlock(data string, preBlockHash []byte) *Block {
 //	hash := sha256.Sum256(headers) //headers其实包含了数据部分，hash类型是字节数组[]byte
 //	b.Hash = hash[:]               //转换为字节数组
 //}
+
+//DeserializeBlock deserializes a block
+//为什么要从字节数组解码区块
+func DeserializeBlock(d []byte) *Block {
+	var block Block
+
+	decoder := gob.NewDecoder(bytes.NewReader(d)) //准备好解码了
+	err := decoder.Decode(&block)                 //执行解码
+	if err != nil {
+		log.Panic(err)
+	}
+
+	return &block
+}

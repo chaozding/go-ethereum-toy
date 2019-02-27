@@ -12,7 +12,7 @@ var (
 	maxNonce = math.MaxInt64 //这个是最大循环次数，超过了就没必要再工作了
 )
 
-const targetBits = 20 //这个是工作量目标，目标为20位，比特币系统规定好的
+const targetBits = 10 //这个是工作量目标，目标为20位，比特币系统规定好的
 //为什么20时，是5个0？
 
 //ProofOfWork represents a proof-of-work
