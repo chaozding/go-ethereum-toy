@@ -38,6 +38,7 @@ func (cli *CLI) printChain() {
 	for { //这是什么循环
 		block := bci.Next()
 
+		fmt.Printf("in for\n") //test
 		fmt.Printf("Pref. hash: %x\n", block.PreBlockHash)
 		fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %x\n", block.Hash)

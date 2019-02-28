@@ -14,8 +14,9 @@ type Blockchain struct {
 	//Blocks []*Block //存储的是Block结构体的指针的数组
 
 	//现在用一个数据库来做这件事了
-	tip []byte //创世区块的哈希值
-	Db  *bolt.DB
+	tip  []byte //创世区块的哈希值
+	tail []byte //末尾区块
+	Db   *bolt.DB
 }
 
 //BlockchainIterator is used to iterate over blockchain blocks
@@ -26,7 +27,18 @@ type BlockchainIterator struct {
 
 //Iterator...
 func (bc *Blockchain) Iterator() *BlockchainIterator {
-	bci := &BlockchainIterator{bc.tip, bc.Db}
+	var currentHash []byte
+	bc.Db.View(func(tx *bolt.Tx) error {
+		// Assume bucket exists and has keys
+		b := tx.Bucket([]byte(blocksBucket))
+		//c := b.Cursor()
+		//currentHash, _ = c.First()
+		//currentHash, _ = c.Last()
+		currentHash = b.Get([]byte("t")) //获取末尾的区块
+		return nil
+	})
+
+	bci := &BlockchainIterator{currentHash, bc.Db}
 
 	return bci //区块链迭代器
 }
@@ -36,9 +48,10 @@ func (i *BlockchainIterator) Next() *Block {
 	var block *Block
 
 	err := i.Db.View(func(tx *bolt.Tx) error {
+		fmt.Printf("in i.Db.View(func(tx *bolt.Tx)\n") //test
 		b := tx.Bucket([]byte(blocksBucket))
-		encodedBlock := b.Get(i.currentHash)
-		block = DeserializeBlock(encodedBlock)
+		encodedBlock := b.Get(i.currentHash)   //这个地方不应该传递这个吧？
+		block = DeserializeBlock(encodedBlock) //这个地方报错了
 
 		return nil
 	})
@@ -70,15 +83,16 @@ func (bc *Blockchain) AddBlock(data string) {
 			//fmt.Printf("in\n") //test
 			//读取最后一个key
 			//Create a cursor for iteration.
-			c := b.Cursor()
+			//c := b.Cursor()
 			//preBlockHash, _ := c.Last() //为什么输出是6c?
 			//preBlockHash, _ := c.First() //这个是创世区块的哈希值
 			//还是用遍历的方法更保险，为什么计算出来的Hash还是6c
 			var preBlockHash []byte
-			_, genesisBlockHash := c.Seek([]byte("l"))
-			for k, _ := c.Seek(genesisBlockHash); k != nil; k, _ = c.Next() {
-				preBlockHash = k
-			}
+			//_, genesisBlockHash := c.Seek([]byte("l"))
+			//for k, _ := c.Seek(genesisBlockHash); k != nil; k, _ = c.Next() {
+			//	preBlockHash = k
+			//}
+			preBlockHash = b.Get([]byte("t"))
 			//fmt.Printf("preBlockHash: %x\n", preBlockHash)
 			newBlock := NewBlock(data, preBlockHash) //创建新区块
 			//装桶
@@ -86,6 +100,12 @@ func (bc *Blockchain) AddBlock(data string) {
 			if err != nil {
 				log.Panic(err)
 			}
+			//更新末尾区块的哈希值
+			err = b.Put([]byte("t"), newBlock.Hash) //leader
+			if err != nil {
+				log.Panic(err)
+			}
+			bc.tail = newBlock.Hash
 		}
 		return nil
 	})
@@ -108,7 +128,8 @@ func (bc *Blockchain) AddBlock(data string) {
 //可以理解为区块链数据结构的构造函数吧
 func NewBlockchain() *Blockchain {
 	//return &Blockchain{[]*Block{NewGenesisBlock()}} //只插入了一个区块
-	var tip []byte //干嘛的？
+	var tip []byte  //创世区块的哈希值
+	var tail []byte //末尾区块的哈希值
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
 		//检查是否打开成功
@@ -136,15 +157,23 @@ func NewBlockchain() *Blockchain {
 				log.Panic(err)
 			}
 
-			//存放领头的Hash
+			//存放领头leader的Hash
 			err = b.Put([]byte("l"), genesis.Hash) //leader
 			if err != nil {
 				log.Panic(err)
 			}
 			tip = genesis.Hash
+
+			//存放末尾tail的Hash
+			err = b.Put([]byte("t"), genesis.Hash) //leader
+			if err != nil {
+				log.Panic(err)
+			}
+			tail = genesis.Hash
 		} else {
 			//已经存在创世区块走这个分支
 			tip = b.Get([]byte("l"))
+			tail = b.Get([]byte("t"))
 		}
 		return nil //为什么return nil
 	})
@@ -153,7 +182,7 @@ func NewBlockchain() *Blockchain {
 		log.Panic(err)
 	}
 
-	bc := Blockchain{tip, db} //创建区块链
+	bc := Blockchain{tip, tail, db} //创建区块链
 
 	return &bc
 }
