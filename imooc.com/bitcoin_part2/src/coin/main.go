@@ -2,11 +2,40 @@ package main
 
 import (
 	"core"
+	"crypto/sha256"
 	"fmt"
+	"math/big"
 	"strconv"
 )
 
+const targetBits = 24 //
+
+func proof() {
+	data1 := []byte("I like dounts")
+	data2 := []byte("I like dountsca07ca")   //这个字符串非常难凑的，反正这次没凑对
+	target := big.NewInt(1)                  //初始化为1
+	target.Lsh(target, uint(256-targetBits)) //为什么是256 - targetBits，这个为什么对应5个0呢
+	fmt.Printf("%x\n", sha256.Sum256(data1))
+	fmt.Printf("%064x\n", target)            //某种特殊的目标格式
+	fmt.Printf("%x\n", sha256.Sum256(data2)) //这个怎么和视频里面不一样啊？
+
+}
+
 func main() {
+	proof()
+	//test
+	/*
+		const targetBits = 24
+		target := big.NewInt(1)
+		target.Lsh(target, uint(1))
+		fmt.Printf("%064x\n", target) //转换为16进制显示
+		target = big.NewInt(1)
+		target.Lsh(target, uint(7))
+		fmt.Printf("%064x\n", target) //转换为16进制显示
+		target.Lsh(target, uint(255))
+		fmt.Printf("%064x\n", target) //转换为16进制显示
+	*/
+
 	//创建一个新的区块链bc
 	bc := core.NewBlockchain()
 

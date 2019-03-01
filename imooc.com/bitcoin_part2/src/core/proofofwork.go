@@ -51,22 +51,22 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 //不要想，代码懂了，不懂也懂
 //Run performs a proof-of-work 类 用到类的成员数据
 func (pow *ProofOfWork) Run() (int, []byte) {
-	var hashInt big.Int
+	var hashInt big.Int //哈希值转换为整数
 	var hash [32]byte
 	nonce := 0
 
 	fmt.Printf("Mining the block containing \"%s\"\n", pow.block.Data)
-	for nonce < maxNonce {
+	for nonce < maxNonce { //最大运行次数
 		data := pow.prepareData(nonce) //嵌套
 
 		hash = sha256.Sum256(data) //输入字节数组，返回的也是字节数组类型
 		fmt.Printf("\r%x", hash)   //快速滚动哈希值
 
 		hashInt.SetBytes(hash[:])          //字节数组类型转换为big.Int类型
-		if hashInt.Cmp(pow.target) == -1 { //相等？
+		if hashInt.Cmp(pow.target) == -1 { //相等？-1应该表示hashInt < pow.target的意思
 			break //对比成功
 		} else {
-			nonce++ //自增到64位整数maxNonce
+			nonce++ //自增到64位整数maxNonce，表示迭代次数，同时这个迭代次数也用于表示变化变量
 		}
 	}
 	fmt.Print("\n\n")
