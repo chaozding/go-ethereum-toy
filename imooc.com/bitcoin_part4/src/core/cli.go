@@ -56,7 +56,10 @@ func (cli *CLI) Run() {
 	cli.validateArgs() //验证参数合法性
 
 	//每个命令都对应一个方法调用
-	addBlockCmd := flag.NewFlagSet("addblock", flag.ExitOnError)
+	getBalanceCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
+	createBlockchainCmd := flag.NewFlagSet("createblockchain", flag.ExitOnError)
+	//addBlockCmd := flag.NewFlagSet("addblock", flag.ExitOnError)
+	sendCmd := flag.NewFlagSet("send", flag.ExitOnError) //用转账交易取代添加区块
 	printChainCmd := flag.NewFlagSet("printchain", flag.ExitOnError)
 
 	//真的很直观啊
