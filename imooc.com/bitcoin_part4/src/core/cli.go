@@ -26,9 +26,22 @@ func (cli *CLI) validateArgs() { //验证参数
 	}
 }
 
-func (cli *CLI) addBlock(data string) {
-	cli.Bc.AddBlock(data)
-	fmt.Println("Success!")
+func (cli *CLI) createBlockchain(address string) {
+	bc := CreateBlockchain(address)
+	bc.db.close()
+	fmt.Println("Done!")
+}
+
+func (cli *CLI) getBalance(address string) {
+	bc := NewBlockchain(address)
+	defer bc.db.Close()
+
+	balance := 0
+	UTXOs := bc.FindUTXO(address) //这个什么意思？
+
+	for _, out := range UTXOs {
+		balance += out.Value
+	}
 }
 
 //打印区块链中的所有区块
