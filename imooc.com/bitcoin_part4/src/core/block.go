@@ -11,12 +11,13 @@ import (
 type Block struct {
 	//定义结构体
 	//Index int64 //区块编号
-	Timestamp    int64  //区块创建时间戳
-	Data         []byte //区块包含的数据，也可以是string，可以非常长
-	PreBlockHash []byte //前一个区块的哈希值，也可以是string，不过[]byte更简单
-	Hash         []byte //区块自身的哈希值，用于校验区块的数据有效性
+	Timestamp int64 //区块创建时间戳
+	//Data         []byte //区块包含的数据，也可以是string，可以放交易描述
+	Transactions []*Transaction //一个区块可以有多个交易对象
+	PreBlockHash []byte         //前一个区块的哈希值，也可以是string，不过[]byte更简单
+	Hash         []byte         //区块自身的哈希值，用于校验区块的数据有效性
 
-	Nonce int
+	Nonce int //工作量证明
 }
 
 //Serialize serializes the block 强行编码，序列化区块
@@ -32,13 +33,14 @@ func (b *Block) Serialize() []byte {
 	return result.Bytes() //通过自身类库转成了字节数组类型
 }
 
-func NewGenesisBlock() *Block { //返回的是一个区块结构结构体的指针
-	return NewBlock("Genesis Block", []byte{}) //空数据
+func NewGenesisBlock(coinbase *Transaction) *Block { //返回的是一个区块结构结构体的指针
+	//return NewBlock("Genesis Block", []byte{}) //空数据
+	return NewBlock([]*Transaction{coinbase}, []byte{}) //只有一个发币交易,用发币交易初始化数组
 }
 
 //经过了工作证明的区块
-func NewBlock(data string, preBlockHash []byte) *Block {
-	block := &Block{time.Now().Unix(), []byte(data), preBlockHash, []byte{}, 0}
+func NewBlock(transactions []*Transaction, preBlockHash []byte) *Block {
+	block := &Block{time.Now().Unix(), transactions, preBlockHash, []byte{}, 0}
 	//block.SetHash()
 	pow := NewProofOfWork(block) //可以理解为类，然后就不用传递数据了
 	//可以理解为类的构造函数

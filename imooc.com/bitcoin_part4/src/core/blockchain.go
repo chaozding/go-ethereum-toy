@@ -4,17 +4,19 @@ import (
 	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
+	"os"
 )
 
 const dbFile = "blockchain.db" //打开硬盘上的文件名，会被存放到项目文件夹下
 const blocksBucket = "blocks"  //因为db里面有许多桶bucket，[]byte(blockBucket)
+const genesisCoinbaseData = "The Times 03/Jan/2009 Chancellor on brink of second bailout of banks"
 
 //原理性展示
 type Blockchain struct {
 	//Blocks []*Block //存储的是Block结构体的指针的数组
 
 	//现在用一个数据库来做这件事了
-	tip []byte //创世区块的哈希值
+	tip []byte //创世区块的哈希值，错，这不是创世区块的哈希值，而是最近的区块的哈希值
 	//tail []byte //末尾区块
 	Db *bolt.DB
 }
@@ -127,64 +129,114 @@ func (bc *Blockchain) AddBlock(data string) {
 
 //NewBlockchain create a new Blockchain with genesis Block
 //可以理解为区块链数据结构的构造函数吧
-func NewBlockchain() *Blockchain {
-	//return &Blockchain{[]*Block{NewGenesisBlock()}} //只插入了一个区块
-	var tip []byte  //创世区块的哈希值
-	var tail []byte //末尾区块的哈希值
+func NewBlockchain(address string) *Blockchain {
+	if dbExists() == false { //要先调用CreateBlockchain函数
+		fmt.Println("No existing blockchain found. Create one first.")
+		os.Exit(1)
+	}
+
+	var tip []byte //创世区块的哈希值
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
-		//检查是否打开成功
 		log.Panic(err)
 	}
 
-	//1.调用Update方法进行数据的写入
 	err = db.Update(func(tx *bolt.Tx) error { //这是什么用法？
-		//2.通过CreateBucket()方法创建BlockBucket(表)，初次使用创建
-		b := tx.Bucket([]byte(blocksBucket)) //查找是否有区块链的桶
+		b := tx.Bucket([]byte(blocksBucket))
+		tip = b.Get([]byte("l"))
 
-		//3.通过Put()方法往表里面存储一条数据(key,value)，注意类型必须为[]byte
-		if b == nil {
-			fmt.Println("No existing blockchain found. Creating a new one...")
-			genesis := NewGenesisBlock() //生成创世区块数据，待会放到桶里
-
-			//创建桶，替代了过去的数组
-			b, err := tx.CreateBucket([]byte(blocksBucket)) //创建名为blocksBucket的桶
-			if err != nil {                                 //创建失败，说明有返回错误类型
-				log.Panic(err)
-			}
-
-			err = b.Put(genesis.Hash, genesis.Serialize()) //存的是区块
-			if err != nil {
-				log.Panic(err)
-			}
-
-			//存放领头leader的Hash
-			err = b.Put([]byte("l"), genesis.Hash) //leader
-			if err != nil {
-				log.Panic(err)
-			}
-			tip = genesis.Hash
-
-			//存放末尾tail的Hash
-			//err = b.Put([]byte("t"), genesis.Hash) //leader
-			//if err != nil {
-			//	log.Panic(err)
-			//}
-			//tail = genesis.Hash
-		} else {
-			//已经存在创世区块走这个分支
-			tip = b.Get([]byte("l"))
-			//tail = b.Get([]byte("t"))
-		}
-		return nil //为什么return nil
+		return nil //没有error
 	})
 
 	if err != nil { //如果上面运行出错了
 		log.Panic(err)
 	}
 
-	//bc := Blockchain{tip, tail, db} //创建区块链
 	bc := Blockchain{tip, db} //创建区块链
 
 	return &bc
+}
+
+//CreateBlockchain create a new blockchain DB
+func CreateBlockchain(address string) *Blockchain {
+	if dbExists() { //这是什么函数
+		fmt.Println("Blockchain alread exits.")
+		os.Exit(1)
+	}
+
+	var tip []byte
+	db, err := bolt.Open(dbFile, 0600, nil) //不能重复打开
+	if err != nil {
+		log.Panic(err)
+	}
+
+	//对文件数据库进行更新
+	err = db.Update(func(tx *bolt.Tx) error {
+		cbtx := NewCoinbaseTX(address, genesisCoinbaseData) //创建一个发币奖励交易记录
+		genesis := NewGenesisBlock(cbtx)                    //创建新的创世区块，输入交易记录
+
+		b, err := tx.CreateBucket([]byte(blocksBucket)) //创建桶
+		if err != nil {
+			log.Panic(err)
+		}
+
+		err = b.Put(genesis.Hash, genesis.Serialize())
+		if err != nil {
+			log.Panic(err)
+		}
+
+		err = b.Put([]byte("l"), genesis.Hash) //last
+		if err != nil {
+			log.Panic(err)
+		}
+
+		tip = genesis.Hash
+
+		return nil
+	})
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	bc := Blockchain{tip, db}
+
+	return &bc
+}
+
+//MineBlock mines a new block with the provided transaction
+func (bc *Blockchain) MineBlock(transaction []*Transaction) {
+	var lastHash []byte
+
+	err := bc.Db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blocksBucket))
+		//找到离我们最近的区块的哈希值，新区块要和它挂钩
+		lastHash = b.Get([]byte("l")) //tips存放的创世区块的哈希值
+
+		return nil
+	})
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	newBlock := NewBlock(transaction, lastHash) //创建了一个包含了新交易记录数组的区块
+
+	//把新的区块挂钩到区块链数据结构里面
+	err = bc.Db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blocksBucket))
+		err := b.Put(newBlock.Hash, newBlock.Serialize())
+		if err != nil {
+			log.Panic(err)
+		}
+
+		err = b.Put([]byte("l"), newBlock.Hash) //现在我是老大
+		if err != nil {
+			log.Panic(err)
+		}
+
+		bc.tip = newBlock.Hash
+
+		return nil
+	})
 }

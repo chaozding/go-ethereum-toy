@@ -47,6 +47,16 @@ func (cli *CLI) getBalance(address string) {
 	}
 }
 
+//Send操作为什么需要创建新的区块链呢？
+func (cli *CLI) send(from, to string, amount int) {
+	bc := NewBlockchain(from) //这个from是传入是什么意思？
+	defer bc.db.Close()
+
+	tx := NewUTXOTransaction(from, to, amount, bc)
+	bc.MineBlock([]*Transaction{tx}) //更新到文件数据库里面去
+	fmt.Println("Successs!")
+}
+
 //打印区块链中的所有区块
 func (cli *CLI) printChain() {
 	bci := cli.Bc.Iterator() //区块链的迭代器
