@@ -14,9 +14,9 @@ type Blockchain struct {
 	//Blocks []*Block //存储的是Block结构体的指针的数组
 
 	//现在用一个数据库来做这件事了
-	tip  []byte //创世区块的哈希值
-	tail []byte //末尾区块
-	Db   *bolt.DB
+	tip []byte //创世区块的哈希值
+	//tail []byte //末尾区块
+	Db *bolt.DB
 }
 
 //BlockchainIterator is used to iterate over blockchain blocks
@@ -101,11 +101,12 @@ func (bc *Blockchain) AddBlock(data string) {
 				log.Panic(err)
 			}
 			//更新末尾区块的哈希值
-			err = b.Put([]byte("t"), newBlock.Hash) //leader
+			err = b.Put([]byte("l"), newBlock.Hash) //leader,不是leader,应该是last
 			if err != nil {
 				log.Panic(err)
 			}
-			bc.tail = newBlock.Hash
+			//bc.tail = newBlock.Hash
+			bc.tip = newBlock.Hash
 		}
 		return nil
 	})
@@ -165,15 +166,15 @@ func NewBlockchain() *Blockchain {
 			tip = genesis.Hash
 
 			//存放末尾tail的Hash
-			err = b.Put([]byte("t"), genesis.Hash) //leader
-			if err != nil {
-				log.Panic(err)
-			}
-			tail = genesis.Hash
+			//err = b.Put([]byte("t"), genesis.Hash) //leader
+			//if err != nil {
+			//	log.Panic(err)
+			//}
+			//tail = genesis.Hash
 		} else {
 			//已经存在创世区块走这个分支
 			tip = b.Get([]byte("l"))
-			tail = b.Get([]byte("t"))
+			//tail = b.Get([]byte("t"))
 		}
 		return nil //为什么return nil
 	})
@@ -182,7 +183,8 @@ func NewBlockchain() *Blockchain {
 		log.Panic(err)
 	}
 
-	bc := Blockchain{tip, tail, db} //创建区块链
+	//bc := Blockchain{tip, tail, db} //创建区块链
+	bc := Blockchain{tip, db} //创建区块链
 
 	return &bc
 }
