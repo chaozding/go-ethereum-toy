@@ -97,12 +97,21 @@ func (cli *CLI) Run() {
 		os.Exit(1)
 	}
 
-	if addBlockCmd.Parsed() {
-		if *addBlockData == "" {
-			addBlockCmd.Usage()
+	if getBalanceCmd.Parsed() {
+		//检查输入参数
+		if *getBalanceAddress == "" { //检查输入参数是否有效
+			getBalanceCmd.Usage()
 			os.Exit(1)
 		}
-		cli.addBlock(*addBlockData)
+		cli.getBalance(*getBalanceAddress) //输入参数其实就是选项啦
+	}
+
+	if createBlockchainCmd.Parsed() {
+		if *createBlockchainAddress == "" {
+			createBlockchainCmd.Usage()
+			os.Exit(1)
+		}
+		cli.createBlockchain(*createBlockchainAddress)
 	}
 
 	if printChainCmd.Parsed() {
