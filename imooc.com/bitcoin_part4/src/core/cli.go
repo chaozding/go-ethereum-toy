@@ -62,8 +62,13 @@ func (cli *CLI) Run() {
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError) //用转账交易取代添加区块
 	printChainCmd := flag.NewFlagSet("printchain", flag.ExitOnError)
 
-	//真的很直观啊
-	addBlockData := addBlockCmd.String("data", "", "block data")
+	//配置主命令选项参数
+	getBalanceAddress := getBalanceCmd.String("address", "", "The address to get balance")
+	createBlockchainAddress := createBlockchainCmd.String("address", "", "The address to coinbase")
+	//addBlockData := addBlockCmd.String("data", "", "block data")
+	sendFrom := sendCmd.String("from", "", "Source wallet address")
+	sendTo := sendCmd.String("to", "", "Destination wallet address")
+	sendAmount := sendCmd.Int("amount", 0, "Amount to send")
 
 	switch os.Args[1] {
 	case "addblock":
