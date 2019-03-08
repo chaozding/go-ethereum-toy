@@ -70,9 +70,20 @@ func (cli *CLI) Run() {
 	sendTo := sendCmd.String("to", "", "Destination wallet address")
 	sendAmount := sendCmd.Int("amount", 0, "Amount to send")
 
+	//提取
 	switch os.Args[1] {
-	case "addblock":
-		err := addBlockCmd.Parse(os.Args[2:])
+	case "getBalance":
+		err := getBalanceCmd.Parse(os.Args[2:]) //索引从0开始的，索引0的位置是./coin
+		if err != nil {
+			log.Panic(err)
+		}
+	case "createBlockchain":
+		err := createBlockchainCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
+	case "send": //创建完了区块链就开始记录交易啦，交易是由地址发起的
+		err := sendCmd.Parse(os.Args[2:])
 		if err != nil {
 			log.Panic(err)
 		}
