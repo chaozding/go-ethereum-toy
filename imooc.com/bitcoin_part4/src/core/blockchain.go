@@ -132,7 +132,7 @@ Work:
 				unspentOutputs[txID] = append(unspentOutputs[txID], out.Value) //交易输出序号
 
 				if accumulated >= amount {
-					break Works
+					break Work
 				}
 			}
 		}
