@@ -33,6 +33,11 @@ type TXOutput struct {
 	ScriptPubKey string //输出签名，为什么这里用来存放输出地址？
 }
 
+//IsCoinbase checks whether the transaction is coinbase
+func (tx Transaction) IsCoinbase() bool {
+	return len(tx.Vin) == 1 && len(tx.Vin[0].Txid) == 0 && tx.Vin[0].Vout == -1
+}
+
 //NewCoinbaseTX creates a new coinbase transaction
 func NewCoinbaseTX(to, data string) *Transaction { //发币交易
 	if data == "" {
