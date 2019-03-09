@@ -128,11 +128,11 @@ Work:
 
 		for outIdx, out := range tx.Vout {
 			if out.CanBeUnlockedWith(address) && accumulated < amount { //这个地方重复工作太多了
-				accumulated += out.Value                                    //计算我的钱
-				unspentOutputs[txID] = append(unspentOutputs[txID], outIdx) //交易输出序号
+				accumulated += out.Value                                       //计算我的钱
+				unspentOutputs[txID] = append(unspentOutputs[txID], out.Value) //交易输出序号
 
 				if accumulated >= amount {
-					break Work
+					break Works
 				}
 			}
 		}
