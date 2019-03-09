@@ -84,6 +84,7 @@ const subsidy = 10
 - 理解的话还是要看那个视频课程。
 - 有代码的情况下，一定要忍住不要找其他资料，没有任何资料会比写代码的人更懂过程原理。
 - 拿个笔和纸随便写写，有利于启发思路。
+- 记得太乱了
 
 ## 参考资料
 - [Gavin Wood: 我与以太坊的二三事](https://mp.weixin.qq.com/s?__biz=MzU2MDE2MDU3Mg==&mid=2247487009&idx=1&sn=516b02f3b37d746f82a065201b2a295f&chksm=fc0d0472cb7a8d644c644e7834d7f1e1c89fc836f626b3c4a422ee97eea5dd6b357e4463b625&mpshare=1&scene=1&srcid=0710l7Q3ubkDQ6xPmpGNIeOc%23rd)
