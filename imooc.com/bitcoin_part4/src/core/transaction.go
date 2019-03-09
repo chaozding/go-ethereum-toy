@@ -33,6 +33,11 @@ type TXOutput struct {
 	ScriptPubKey string //输出签名，为什么这里用来存放输出地址？
 }
 
+//CanBeUnlockedWith checks if the output can be unlocked with the provided data
+func (out *TXOutput) CanBeUnlockedWidth(unlockingData string) bool {
+	return out.ScriptPubKey == unlockingData
+}
+
 //IsCoinbase checks whether the transaction is coinbase
 func (tx Transaction) IsCoinbase() bool {
 	return len(tx.Vin) == 1 && len(tx.Vin[0].Txid) == 0 && tx.Vin[0].Vout == -1
