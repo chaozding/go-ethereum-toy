@@ -31,26 +31,28 @@ func (cli *CLI) validateArgs() { //验证参数
 
 func (cli *CLI) createBlockchain(address string) {
 	bc := CreateBlockchain(address)
-	bc.db.close()
+	bc.Db.Close()
 	fmt.Println("Done!")
 }
 
 func (cli *CLI) getBalance(address string) {
-	bc := NewBlockchain(address)
-	defer bc.db.Close()
+	bc := NewBlockchain(address) //取得区块链
+	defer bc.Db.Close()
 
 	balance := 0
 	UTXOs := bc.FindUTXO(address) //这个什么意思？
 
 	for _, out := range UTXOs {
-		balance += out.Value
+		balance += out.Value //把没花出去的钱都累加起来
 	}
+
+	fmt.Printf("Balance of '%s': %d\n", address, balance)
 }
 
 //Send操作为什么需要创建新的区块链呢？
 func (cli *CLI) send(from, to string, amount int) {
 	bc := NewBlockchain(from) //这个from是传入是什么意思？
-	defer bc.db.Close()
+	defer bc.Db.Close()
 
 	tx := NewUTXOTransaction(from, to, amount, bc)
 	bc.MineBlock([]*Transaction{tx}) //更新到文件数据库里面去
@@ -66,7 +68,7 @@ func (cli *CLI) printChain() {
 
 		fmt.Printf("in for\n") //test
 		fmt.Printf("Pref. hash: %x\n", block.PreBlockHash)
-		fmt.Printf("Data: %s\n", block.Data)
+		//fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %x\n", block.Hash)
 		pow := NewProofOfWork(block)
 		fmt.Printf("Pow: %s\n", strconv.FormatBool(pow.Validate()))
