@@ -39,7 +39,7 @@ func (in *TXInput) CanUnlockOutputWith(unlockingData string) bool {
 }
 
 //CanBeUnlockedWith checks if the output can be unlocked with the provided data
-func (out *TXOutput) CanBeUnlockedWidth(unlockingData string) bool {
+func (out *TXOutput) CanBeUnlockedWith(unlockingData string) bool {
 	return out.ScriptPubKey == unlockingData
 }
 
@@ -69,7 +69,7 @@ func NewUTXOTransaction(from, to string, amount int, bc *Blockchain) *Transactio
 
 	acc, validOutputs := bc.FindSpendableOutputs(from, amount) //validOutputs存放的是交易输出集合
 
-	if acc < amount {
+	if acc < amount { //最终统计出来的可解锁的总钱数
 		log.Panic("ERROR: Not enough funds")
 	}
 
