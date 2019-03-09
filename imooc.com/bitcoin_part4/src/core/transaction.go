@@ -33,6 +33,11 @@ type TXOutput struct {
 	ScriptPubKey string //输出签名，为什么这里用来存放输出地址？
 }
 
+//CanUnlockOutputWith checks whether the address initiated the transaction
+func (in *TXInput) CanUnlockOutputWith(unlockingData string) bool {
+	return in.ScriptSig == unlockingData
+}
+
 //CanBeUnlockedWith checks if the output can be unlocked with the provided data
 func (out *TXOutput) CanBeUnlockedWidth(unlockingData string) bool {
 	return out.ScriptPubKey == unlockingData
