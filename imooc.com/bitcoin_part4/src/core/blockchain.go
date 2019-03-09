@@ -1,6 +1,7 @@
 package core //可以理解为打包为core类
 
 import (
+	"encoding/hex"
 	"fmt"
 	"github.com/boltdb/bolt"
 	"log"
@@ -65,6 +66,54 @@ func (i *BlockchainIterator) Next() *Block {
 	i.currentHash = block.PreBlockHash //
 
 	return block
+}
+
+//FindUnspentTransactions returns a list of transactions containing unspent outputs 不考虑是否足够
+func (bc *Blockchain) FindUnspentTransactions(address string) []Transaction {
+	var unspentTxs []Transaction //包含未花出去的交易输出的交易记录Transaction, 放到数组里面
+	spentTXOs := make(map[string][]int)
+	bci := bc.Iterator() //获取区块链对象迭代器
+
+	for { //类似C++的while(1) {}
+		block := bci.Next() //搜索下一个区块
+
+		for _, tx := range block.Transactions { //遍历一个区块的所有交易数组[]Transaction
+			txID := hex.EncodeToString(tx.ID) //交易序号，[]byte转换为string
+
+		Outputs:
+			for outIdx, out := range tx.Vout { //单个交易记录Transaction，遍历其所有交易输出[]TXOutput
+				//Was the output spent?
+				if spentTXOs[txID] != nil { //如果没有OutputX有箭头出来
+					for _, spentOut := range spentTXOs[txID] {
+						if spentOut == outIdx {
+							continue Outputs
+						}
+					}
+				}
+
+				//经过上面的步骤，排除掉了有箭头出来的交易输出TXOutput
+				if out.CanBeUnlockedWith(address) { //判断是否是我的地址的钱
+					unspentTxs = append(unspentTxs, *tx)
+				}
+			}
+
+			//发币交易只有一个空的交易输入和一个交易输出
+			if tx.IsCoinbase() == false { //如果是普通交易/转账交易
+				for _, in := range tx.Vin { //只有普通交易/转账交易有有效的交易输入可找
+					if in.CanUnlockOutputWith(address) { //判断这个交易输入是否属于我？
+						inTxID := hex.EncodeToString(in.Txid) //交易输入的输入序号
+						spentTXOs[inTxID] = append(spentTXOs[inTxID], in.Vout)
+					}
+				}
+			}
+		}
+
+		if len(block.PreBlockHash) == 0 { //说明当前block是创世区块
+			break
+		}
+	}
+
+	return unspentTxs
 }
 
 //AddBlock saves provided data as a block in the blockchain
