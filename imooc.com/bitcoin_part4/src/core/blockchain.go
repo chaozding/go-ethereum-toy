@@ -116,6 +116,31 @@ func (bc *Blockchain) FindUnspentTransactions(address string) []Transaction {
 	return unspentTxs
 }
 
+//
+func (bc *Blockchain) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
+	unspentOutputs := make(map[string][]int)
+	unspentTXs := bc.FindUnspentTransactions(address) //但是没有判断余额
+	accumulated := 0
+
+Work:
+	for _, tx := range unspentTXs {
+		txID := hex.EncodeToString(tx.ID) //所属的交易序号
+
+		for outIdx, out := range tx.Vout {
+			if out.CanBeUnlockedWith(address) && accumulated < amount { //这个地方重复工作太多了
+				accumulated += out.Value                                    //计算我的钱
+				unspentOutputs[txID] = append(unspentOutputs[txID], outIdx) //交易输出序号
+
+				if accumulated >= amount {
+					break Work
+				}
+			}
+		}
+	}
+
+	return accumulated, unspentOutputs
+}
+
 //AddBlock saves provided data as a block in the blockchain
 func (bc *Blockchain) AddBlock(data string) {
 	//获得最后一个区块，以便获得他的哈希值放到新的区块中
