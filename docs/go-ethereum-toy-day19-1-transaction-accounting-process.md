@@ -42,6 +42,8 @@
 
 获取某个账户地址的余额
 查找未花掉余额的输出的所有交易/找到属于我的那些没有花出去的交易 func (bc *Blockchain) FindUTXO(address string) []TXOutput [66ccf5d](https://github.com/chaozding/go-ethereum-toy/commit/66ccf5d7b94f463a5a8075ac91886c83f295eb78)
+
+数字地址:比特币钱包
 ## Go语法
 - hex.EncodeToString([]byte) 
 - func append(slice []Type, elems ...Type) []Type
