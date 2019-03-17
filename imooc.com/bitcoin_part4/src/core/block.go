@@ -2,6 +2,7 @@ package core
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"encoding/gob"
 	"log"
 	"time"
@@ -72,4 +73,17 @@ func DeserializeBlock(d []byte) *Block {
 	}
 
 	return &block
+}
+
+//计算区块里所有交易的哈希
+func (b *Block) HashTransactions() []byte {
+	var txHashes [][]byte
+	var txHash [32]byte
+
+	for _, tx := range b.Transactions {
+		txHashes = append(txHashes, tx.ID) //func (tx *Transaction) SetID()
+	}
+	txHash = sha256.Sum256(bytes.Join(txHashes, []byte{})) //为什么需要添加一个空的[]byte{}
+
+	return txHash[:]
 }
