@@ -158,57 +158,57 @@ Work:
 }
 
 //AddBlock saves provided data as a block in the blockchain
-func (bc *Blockchain) AddBlock(data string) {
-	//获得最后一个区块，以便获得他的哈希值放到新的区块中
-	//preBlock := bc.Blocks[len(bc.Blocks)-1]
-	//打开文件
-	//fmt.Printf("0\n") //test
-	//db, err := bolt.Open(dbFile, 0600, nil) //不可以重复打开数据库对象
-	db := bc.Db
-	//fmt.Printf("1\n") //test
-	//前一个区块的哈希值也是外来数据
-	//newBlock := NewBlock(data, preBlock.Hash) //创建新区块
-	err := db.Update(func(tx *bolt.Tx) error { //这是什么用法？
-		b := tx.Bucket([]byte(blocksBucket)) //查找是否有区块链的桶并取得之
-		//fmt.Printf("out\n") //test
-		if b != nil { //说明已经存在区块链了
-			//fmt.Printf("in\n") //test
-			//读取最后一个key
-			//Create a cursor for iteration.
-			//c := b.Cursor()
-			//preBlockHash, _ := c.Last() //为什么输出是6c?
-			//preBlockHash, _ := c.First() //这个是创世区块的哈希值
-			//还是用遍历的方法更保险，为什么计算出来的Hash还是6c
-			var preBlockHash []byte
-			//_, genesisBlockHash := c.Seek([]byte("l"))
-			//for k, _ := c.Seek(genesisBlockHash); k != nil; k, _ = c.Next() {
-			//	preBlockHash = k
-			//}
-			preBlockHash = b.Get([]byte("t"))
-			//fmt.Printf("preBlockHash: %x\n", preBlockHash)
-			newBlock := NewBlock(data, preBlockHash) //创建新区块
-			//装桶
-			err := b.Put(newBlock.Hash, newBlock.Serialize())
-			if err != nil {
-				log.Panic(err)
-			}
-			//更新末尾区块的哈希值
-			err = b.Put([]byte("l"), newBlock.Hash) //leader,不是leader,应该是last
-			if err != nil {
-				log.Panic(err)
-			}
-			//bc.tail = newBlock.Hash
-			bc.tip = newBlock.Hash
-		}
-		return nil
-	})
-
-	if err != nil { //如果上面运行出错了
-		log.Panic(err)
-	}
-
-	//bc.Blocks = append(bc.Blocks, newBlock)
-}
+//func (bc *Blockchain) AddBlock(data string) {
+//	//获得最后一个区块，以便获得他的哈希值放到新的区块中
+//	//preBlock := bc.Blocks[len(bc.Blocks)-1]
+//	//打开文件
+//	//fmt.Printf("0\n") //test
+//	//db, err := bolt.Open(dbFile, 0600, nil) //不可以重复打开数据库对象
+//	db := bc.Db
+//	//fmt.Printf("1\n") //test
+//	//前一个区块的哈希值也是外来数据
+//	//newBlock := NewBlock(data, preBlock.Hash) //创建新区块
+//	err := db.Update(func(tx *bolt.Tx) error { //这是什么用法？
+//		b := tx.Bucket([]byte(blocksBucket)) //查找是否有区块链的桶并取得之
+//		//fmt.Printf("out\n") //test
+//		if b != nil { //说明已经存在区块链了
+//			//fmt.Printf("in\n") //test
+//			//读取最后一个key
+//			//Create a cursor for iteration.
+//			//c := b.Cursor()
+//			//preBlockHash, _ := c.Last() //为什么输出是6c?
+//			//preBlockHash, _ := c.First() //这个是创世区块的哈希值
+//			//还是用遍历的方法更保险，为什么计算出来的Hash还是6c
+//			var preBlockHash []byte
+//			//_, genesisBlockHash := c.Seek([]byte("l"))
+//			//for k, _ := c.Seek(genesisBlockHash); k != nil; k, _ = c.Next() {
+//			//	preBlockHash = k
+//			//}
+//			preBlockHash = b.Get([]byte("t"))
+//			//fmt.Printf("preBlockHash: %x\n", preBlockHash)
+//			newBlock := NewBlock(data, preBlockHash) //创建新区块
+//			//装桶
+//			err := b.Put(newBlock.Hash, newBlock.Serialize())
+//			if err != nil {
+//				log.Panic(err)
+//			}
+//			//更新末尾区块的哈希值
+//			err = b.Put([]byte("l"), newBlock.Hash) //leader,不是leader,应该是last
+//			if err != nil {
+//				log.Panic(err)
+//			}
+//			//bc.tail = newBlock.Hash
+//			bc.tip = newBlock.Hash
+//		}
+//		return nil
+//	})
+//
+//	if err != nil { //如果上面运行出错了
+//		log.Panic(err)
+//	}
+//
+//	//bc.Blocks = append(bc.Blocks, newBlock)
+//}
 
 //func (bc *Blockchain) DeleteBlockchain() {
 //	var tx *bolt.Tx
