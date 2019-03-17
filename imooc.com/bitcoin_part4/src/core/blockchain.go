@@ -134,7 +134,7 @@ func (bc *Blockchain) FindUTXO(address string) []TXOutput {
 
 //
 func (bc *Blockchain) FindSpendableOutputs(address string, amount int) (int, map[string][]int) {
-	unspentOutputs := make(map[string][]int)
+	unspentOutputs := make(map[string][]int)          //unspentOutputs[txID]类型是[]int
 	unspentTXs := bc.FindUnspentTransactions(address) //但是没有判断余额
 	accumulated := 0
 
@@ -144,8 +144,8 @@ Work:
 
 		for outIdx, out := range tx.Vout {
 			if out.CanBeUnlockedWith(address) && accumulated < amount { //这个地方重复工作太多了
-				accumulated += out.Value                                       //计算我的钱
-				unspentOutputs[txID] = append(unspentOutputs[txID], out.Value) //交易输出序号
+				accumulated += out.Value                                    //计算我的钱
+				unspentOutputs[txID] = append(unspentOutputs[txID], outIdx) //交易输出序号
 
 				if accumulated >= amount {
 					break Work
