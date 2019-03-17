@@ -37,7 +37,7 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte {
 	data := bytes.Join( //原来这一步是block.SetHash()干的事情
 		[][]byte{
 			pow.block.PreBlockHash,
-			pow.block.Data,
+			pow.block.HashTransactions(),
 			IntToHex(pow.block.Timestamp), //这个是自己写的工具函数
 			IntToHex(int64(targetBits)),   //为什么加入这个？反正是固定值，感觉不加也没事？
 			IntToHex(int64(nonce)),        //转换位十六进制的字符串
@@ -55,7 +55,7 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 	var hash [32]byte
 	nonce := 0
 
-	fmt.Printf("Mining the block containing \"%s\"\n", pow.block.Data)
+	fmt.Printf("Mining the block")
 	for nonce < maxNonce {
 		data := pow.prepareData(nonce) //嵌套
 
