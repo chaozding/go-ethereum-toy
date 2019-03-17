@@ -217,6 +217,14 @@ func (bc *Blockchain) AddBlock(data string) {
 //	err := tx.DeleteBucket([]byte(blocksBucket))
 //}
 
+func dbExists() bool {
+	if _, err := os.Stat(dbFile); os.IsNotExist(err) {
+		return false
+	}
+
+	return true
+}
+
 //NewBlockchain create a new Blockchain with genesis Block
 //可以理解为区块链数据结构的构造函数吧
 func NewBlockchain(address string) *Blockchain {
