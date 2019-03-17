@@ -10,7 +10,7 @@ import (
 
 //CLI reponsible for processing command line arguments
 type CLI struct {
-	Bc *Blockchain
+	//Bc *Blockchain
 }
 
 func (cli *CLI) printUsage() {
@@ -51,22 +51,26 @@ func (cli *CLI) getBalance(address string) {
 
 //Send操作为什么需要创建新的区块链呢？
 func (cli *CLI) send(from, to string, amount int) {
-	bc := NewBlockchain(from) //这个from是传入是什么意思？
+	bc := NewBlockchain(from) //这个from是传入是什么意思？实际上没用到，作用就是获得数据库指针
 	defer bc.Db.Close()
 
-	tx := NewUTXOTransaction(from, to, amount, bc)
-	bc.MineBlock([]*Transaction{tx}) //更新到文件数据库里面去
+	tx := NewUTXOTransaction(from, to, amount, bc) //创建新的交易
+	bc.MineBlock([]*Transaction{tx})               //更新到文件数据库里面去，为新交易挖矿
 	fmt.Println("Successs!")
 }
 
 //打印区块链中的所有区块
 func (cli *CLI) printChain() {
-	bci := cli.Bc.Iterator() //区块链的迭代器
+	//bci := cli.Bc.Iterator() //区块链的迭代器
+	bc := NewBlockchain("")
+	defer bc.Db.Close()
+
+	bci := bc.Iterator()
 
 	for { //这是什么循环
 		block := bci.Next()
 
-		fmt.Printf("in for\n") //test
+		//fmt.Printf("in for\n") //test
 		fmt.Printf("Pref. hash: %x\n", block.PreBlockHash)
 		//fmt.Printf("Data: %s\n", block.Data)
 		fmt.Printf("Hash: %x\n", block.Hash)

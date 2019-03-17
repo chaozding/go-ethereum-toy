@@ -17,42 +17,30 @@ type Blockchain struct {
 	//Blocks []*Block //存储的是Block结构体的指针的数组
 
 	//现在用一个数据库来做这件事了
-	tip []byte //创世区块的哈希值，错，这不是创世区块的哈希值，而是最近的区块的哈希值
+	tip []byte //创世区块的哈希值，错，这不是存放的创世区块的哈希值，而是存放的最近的区块的哈希值
 	//tail []byte //末尾区块
 	Db *bolt.DB
 }
 
-//BlockchainIterator is used to iterate over blockchain blocks
+//BlockchainIterator is used to iterate over blockchain blocks，用来存放迭代变量
 type BlockchainIterator struct {
 	currentHash []byte   //记录当前的索引/哈希值
 	Db          *bolt.DB //访问方法都要变了
 }
 
-//Iterator...
+//重写迭代器？不是重写，会调用 bci := bc.Iterattor() 返回初始化区块链迭代变量
 func (bc *Blockchain) Iterator() *BlockchainIterator {
-	var currentHash []byte
-	bc.Db.View(func(tx *bolt.Tx) error {
-		// Assume bucket exists and has keys
-		b := tx.Bucket([]byte(blocksBucket))
-		//c := b.Cursor()
-		//currentHash, _ = c.First()
-		//currentHash, _ = c.Last()
-		currentHash = b.Get([]byte("t")) //获取末尾的区块
-		return nil
-	})
-
-	bci := &BlockchainIterator{currentHash, bc.Db}
+	bci := &BlockchainIterator{bc.tip, bc.Db}
 
 	return bci //区块链迭代器
 }
 
-//Next returns next block starting from the tip
+//Next returns next block starting from the tip，这个也是重写的？不是重写
 func (i *BlockchainIterator) Next() *Block {
 	var block *Block
 
 	err := i.Db.View(func(tx *bolt.Tx) error {
-		fmt.Printf("in i.Db.View(func(tx *bolt.Tx)\n") //test
-		b := tx.Bucket([]byte(blocksBucket))
+		b := tx.Bucket([]byte(blocksBucket))   //获得区块链桶结构体
 		encodedBlock := b.Get(i.currentHash)   //这个地方不应该传递这个吧？
 		block = DeserializeBlock(encodedBlock) //这个地方报错了
 
@@ -63,7 +51,7 @@ func (i *BlockchainIterator) Next() *Block {
 		log.Panic(err)
 	}
 
-	i.currentHash = block.PreBlockHash //
+	i.currentHash = block.PreBlockHash
 
 	return block
 }
@@ -226,7 +214,7 @@ func dbExists() bool {
 }
 
 //NewBlockchain create a new Blockchain with genesis Block
-//可以理解为区块链数据结构的构造函数吧
+//可以理解为区块链数据结构的构造函数吧，这个不是创建新的区块链吧？应该是只能取得已经存在的区块链对象吧
 func NewBlockchain(address string) *Blockchain {
 	if dbExists() == false { //要先调用CreateBlockchain函数
 		fmt.Println("No existing blockchain found. Create one first.")
