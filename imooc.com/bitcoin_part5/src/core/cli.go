@@ -85,20 +85,21 @@ func (cli *CLI) printChain() {
 	}
 }
 
+//Run parses command line argument and processes commands
 func (cli *CLI) Run() {
 	cli.validateArgs() //验证参数合法性
 
-	//每个命令都对应一个方法调用
-	getBalanceCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
+	//每个命令都对应一个主方法调用
 	createBlockchainCmd := flag.NewFlagSet("createblockchain", flag.ExitOnError)
-	//addBlockCmd := flag.NewFlagSet("addblock", flag.ExitOnError)
+	getBalanceCmd := flag.NewFlagSet("getBalance", flag.ExitOnError)
+	createWalletCmd := flag.NewFlagSet("createwallet", flag.ExitOnError)
+	listAddressCmd := flag.NewFlagSet("listaddresses", flag.ExitOnError)
 	sendCmd := flag.NewFlagSet("send", flag.ExitOnError) //用转账交易取代添加区块
 	printChainCmd := flag.NewFlagSet("printchain", flag.ExitOnError)
 
 	//配置主命令选项参数
 	getBalanceAddress := getBalanceCmd.String("address", "", "The address to get balance")
 	createBlockchainAddress := createBlockchainCmd.String("address", "", "The address to coinbase")
-	//addBlockData := addBlockCmd.String("data", "", "block data")
 	sendFrom := sendCmd.String("from", "", "Source wallet address")
 	sendTo := sendCmd.String("to", "", "Destination wallet address")
 	sendAmount := sendCmd.Int("amount", 0, "Amount to send")
@@ -112,6 +113,16 @@ func (cli *CLI) Run() {
 		}
 	case "createBlockchain":
 		err := createBlockchainCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
+	case "createwallet": //主命令
+		err := createWalletCmd.Parse(os.Args[2:]) //把参数给主命令
+		if err != nil {
+			log.Panic(err)
+		}
+	case "listaddresses": //主命令
+		err := listAddressCmd.Parse(os.Args[2:])
 		if err != nil {
 			log.Panic(err)
 		}
@@ -147,11 +158,19 @@ func (cli *CLI) Run() {
 		cli.createBlockchain(*createBlockchainAddress)
 	}
 
+	if createWalletCmd.Parsed() { //需要和参数对应
+		cli.createWallet() //走到这里创建钱包
+	}
+
+	if listAddressCmd.Parsed() { //需要和参数对应
+		cli.listAddresses() //罗列地址
+	}
+
 	if printChainCmd.Parsed() {
 		cli.printChain()
 	}
 
-	if sendCmd.Parsed() {
+	if sendCmd.Parsed() { //检查参数有效性
 		if *sendFrom == "" || *sendTo == "" || *sendAmount <= 0 {
 			sendCmd.Usage()
 			os.Exit(1)
