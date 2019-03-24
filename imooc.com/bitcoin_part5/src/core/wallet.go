@@ -4,6 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"crypto/sha256"
 	"log"
 )
 
@@ -37,6 +38,20 @@ func (w Wallet) GetAddress() []byte {
 	address := Base58Encode(fullPayload)               //这个函数也要自己写？
 
 	return address
+}
+
+//HashPubKey hashes public key
+func HashPubKey(pubKey []byte) []byte {
+	publicSHA256 := sha256.Sum256(pubKey)
+
+	RIPEMD160Hasher := ripemd160.New() //这是什么？
+	_, err := RIPEMD160Hasher.Write(publicSHA256[:])
+	if err != nil {
+		log.Panic(err)
+	}
+	publicRIPEMD160 := RIPEMD160Hasher.Sum(nil)
+
+	return publicRIPEMD160
 }
 
 func newKeyPair() (ecdsa.PrivateKey, []byte) {
