@@ -23,7 +23,7 @@ func NewWallet() *Wallet {
 	private, public := newKeyPair() //这样就生成了公钥和私钥对了
 	wallet := Wallet{private, public}
 
-	return &wallet
+	return &wallet //这个存储地址有什么用啊，到时候保存的是地址值?
 }
 
 //GetAddress returns wallet address
