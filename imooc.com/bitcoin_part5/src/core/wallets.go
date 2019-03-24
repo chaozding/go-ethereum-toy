@@ -18,7 +18,7 @@ func NewWallets() (*Wallets, error) {
 }
 
 func (ws *Wallets) CreateWallet() string {
-	wallet := NewWallet()
+	wallet := NewWallet() //返回公钥私钥对的
 	address := fmt.Sprintf("%s", wallet.GetAddress())
 
 	ws.Wallets[address] = wallet
