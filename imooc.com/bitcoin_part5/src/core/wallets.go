@@ -1,5 +1,7 @@
 package core
 
+import "fmt"
+
 //Wallets stores a collection of wallets
 type Wallets struct {
 	Wallets map[string]*Wallets
@@ -13,4 +15,13 @@ func NewWallets() (*Wallets, error) {
 	err := wallets.LoadFromFile() //从已有的文件中读取，初始化包含在创建钱包里面
 
 	return &wallets, err //错误返回有什么用
+}
+
+func (ws *Wallets) CreateWallet() string {
+	wallet := NewWallet()
+	address := fmt.Sprintf("%s", wallet.GetAddress())
+
+	ws.Wallets[address] = wallet
+
+	return address
 }
