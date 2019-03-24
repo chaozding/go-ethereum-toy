@@ -1,6 +1,11 @@
 package core
 
-import "crypto/ecdsa"
+import (
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"log"
+)
 
 const versiion = byte(0x00)
 const walletFile = "wallet.dat"
@@ -14,8 +19,18 @@ type Wallet struct {
 
 //NewWallet creates and returns a Wallet
 func NewWallet() *Wallet {
-	private, public := newKeyPair()
+	private, public := newKeyPair() //这样就生成了公钥和私钥对了
 	wallet := Wallet{private, public}
 
 	return &wallet
+}
+
+func newKeyPair() (ecdsa.PrivateKey, []byte) {
+	curve := elliptic.P256()
+	private, err := ecdsa.GenerateKey(curve, rand.Reader)
+	if err != nil {
+		log.Panic(err)
+	}
+	pubKey := append(private.PublicKey.X.Bytes(), private.PublicKey.Y.Bytes()...)
+	return *private, pubKey
 }
