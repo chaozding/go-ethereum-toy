@@ -112,8 +112,8 @@ Wallets.go 里面的创建钱包函数 func (ws *Wallets) CreateWallet() string 
 
 创建钱包后,需要把钱包的地址取得作为钱包集合的索引用 func (ws Wallets) SaveToFile() [a15010f](https://github.com/chaozding/go-ethereum-toy/commit/a15010fc5da06e2457d35bcf9c7c006fcb809635)
 
-
 ### 可执行调试
+还要把地址换成现在的字符串格式的
 
 ### 《私有区块链,我们一起GO-慕课网》课程总结
 区块链的Go语言开源项目
